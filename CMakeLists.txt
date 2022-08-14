@@ -1,0 +1,109 @@
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+# Main CMake
+
+#
+# Debugging Options
+#
+if (CMAKE_BUILD_TYPE STREQUAL "Debug") 
+    SET (CMAKE_VERBOSE_MAKEFILE 1) # Use 1 for debugging, 0 for release
+ENDIF()
+
+#Build Cmake Environment
+SET(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
+find_package(PkgConfig)
+include(CheckCXXCompilerFlag)
+include(ExternalProject)
+include(CheckTypeSize)
+include(CheckIncludeFiles)
+
+## Use the variable PROJECT_NAME for changing the target name
+SET ( PROJECT_NAME "ops4bos" )
+
+## Version depens on
+SET (SDL2_VER "2.0.12")
+SET (SDL2_IMAGE_VER "2.0.1")
+SET (SDL2_TTF_VER "2.0.12")
+
+file(STRINGS "RELEASE_VERSION.txt" RELEASE_VERSION)
+SET(RELEASE_VERSION  "${RELEASE_VERSION}" CACHE INTERNAL "RELEASE_VERSION")
+
+PROJECT(${PROJECT_NAME} VERSION "${RELEASE_VERSION}" ) ## Not Able to use CXX because C files are not compiled
+
+MESSAGE(STATUS "Try Build ${PROJECT_NAME}")
+message(STATUS "Compiler ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Building on ${CMAKE_SYSTEM_NAME}")
+MESSAGE(STATUS "Build for ${TARGET}")
+
+#
+# Project Output Paths
+#
+SET (MAINFOLDER ${PROJECT_SOURCE_DIR})
+IF("${TARGET}" STREQUAL "")
+   message(WARNING "TARGET not set please add -DTRAGET to command line Suported Target are Linux,PI (crosscompile)")
+   SET(TARGET ${CMAKE_SYSTEM_NAME})
+ENDIF()
+
+IF("${CMAKE_EXPORT_COMPILE_COMMANDS}" STREQUAL "")
+   SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ENDIF()
+
+SET (EXECUTABLE_OUTPUT_PATH "${MAINFOLDER}/bin/${TARGET}")
+SET (LIBRARY_OUTPUT_PATH "${MAINFOLDER}/lib/${TARGET}")
+SET (LIBS_DIR ${PROJECT_SOURCE_DIR}/libs/${TARGET})
+
+configure_file("${MAINFOLDER}/src/common/version.hpp.in" "${MAINFOLDER}/src/common/version.hpp")
+
+MESSAGE(STATUS "Build to ${EXECUTABLE_OUTPUT_PATH}")
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+
+CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
+
+IF(COMPILER_SUPPORTS_CXX17)
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+ELSE()
+   message(ERROR "we need c++17 to build")
+ENDIF()
+
+CHECK_CXX_COMPILER_FLAG("-Wno-psabi" _has_no_psabi)
+if(_has_no_psabi)
+    message(STATUS "Disabling psABI warnings.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
+endif(_has_no_psabi)
+
+CHECK_INCLUDE_FILE_CXX("time.h" HAVE_TIME_H)
+check_type_size("time_t" SIZEOF_TIME_T LANGUAGE CXX)
+
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -DDEBUG")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIZEOF_TIME_T=${SIZEOF_TIME_T}")
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-psabi -DELPP_THREAD_SAFE -DELPP_FEATURE_PERFORMANCE_TRACKING -DELPP_NO_DEFAULT_LOG_FILE -DELPP_STACKTRACE_ON_CRASH")
+  #-DELPP_STACKTRACE_ON_CRASH only on linux with gcc
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
+MESSAGE(STATUS "Compiler Flags are ${CMAKE_CXX_FLAGS}")
+
+FIND_PACKAGE(SDL2)
+FIND_PACKAGE(OSMScout)
+
+if(OSMScout_FOUND)
+    FIND_PACKAGE(Cairo REQUIRED)
+    FIND_PACKAGE(PANGO REQUIRED)
+    MESSAGE(STATUS "OSMScout include ${OSMScout_INCLUDE_DIRS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLIBOSMSCOUT")
+endif()
+FIND_PACKAGE(SQLITE3)
+
+if(SDL2_FOUND)
+    FIND_PACKAGE(SDL2_image)
+    FIND_PACKAGE(SDL2_ttf)
+    FIND_PACKAGE(SDL2_mixer)
+    FIND_PACKAGE(SDL2_net)
+endif()
+
+MESSAGE(STATUS "SDL2 ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS}")
+
+ADD_SUBDIRECTORY(modules/SDL2GuiHelper/common)
+ADD_SUBDIRECTORY(modules/SDL2GuiHelper/src)
+ADD_SUBDIRECTORY(src)
