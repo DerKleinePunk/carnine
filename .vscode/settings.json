@@ -1,0 +1,9 @@
+{
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "cmake.configureOnOpen": true,
+    "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
+    "cmake.configureSettings": { 
+        "ENABLE_CPPCHECK" : "OFF",
+        "TARGET" : "Linux"
+    }
+}
