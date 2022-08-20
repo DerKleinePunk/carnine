@@ -13,9 +13,11 @@
 
 #include "../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
 #include "../../modules/SDL2GuiHelper/common/utils/commonutils.h"
-#include "../common/utils/CommandLineArgs.h"
+#include "../common/utils/CommandLineArgs.hpp"
+#include "../common/utils/LogNetDispatcher.hpp"
 #include "../common/version.hpp"
 #include "Controller/BackendController.hpp"
+#include "Config/BackendConfig.hpp"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -61,6 +63,7 @@ void handleUserInterrupt(int sig)
     }
 }
 
+BackendConfig* config = nullptr;
 BackendController* backendController = nullptr;
 
 //Time Callback called every ?
@@ -125,6 +128,31 @@ int main(int argc, char** argv)
     signal(SIGABRT, handleUserInterrupt);
 
     LOG(INFO) << "Starting CarNiNe Backend " << PROJECT_VER;
+
+    utils::CommandLineArgs commandLineArgs;
+    commandLineArgs.Pharse(argc, argv);
+
+    const auto configFileName = commandLineArgs.GetParamValue("--c");
+
+    if(configFileName.empty()) {
+        sd_journal_print(LOG_ERR, "Missing Commanline Parameter Configfile");
+        LOG(ERROR) << "Missing Commandline Parameter Configfile";
+        std::cout << "Missing Commandline Parameter Configfile" << std::endl;
+        exit_code = -6;
+        goto finish;
+    } else {
+        sd_journal_print(LOG_INFO, "Using Config File %s", configFileName.c_str());
+        LOG(INFO) << "Using Config File" << configFileName;
+        config = new BackendConfig(configFileName);
+        config->Load();
+
+        if(!config->GetUdpLogServer().empty()) {
+            el::Helpers::installLogDispatchCallback<LogNetDispatcher>("NetworkDispatcher");
+            auto dispatcher = el::Helpers::logDispatchCallback<LogNetDispatcher>("NetworkDispatcher");
+            dispatcher->setEnabled(true);
+            dispatcher->updateServer(config->GetUdpLogServer(), 9090, 8001);
+        }
+    }
 
     if(sd_event_default(&event) < 0) {
         sd_journal_print(LOG_ERR, "Cannot instantiate the event loop.");
@@ -231,6 +259,11 @@ finish:
     if(backendController != nullptr) {
         delete backendController;
     }
+
+    if(config != nullptr) {
+        delete config;
+    }
+
     LOG(INFO) << "Last LogEntry";
     el::Helpers::uninstallPreRollOutCallback();
 

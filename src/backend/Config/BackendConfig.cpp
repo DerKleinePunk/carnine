@@ -9,11 +9,27 @@
 #include "BackendConfig.hpp"
 #include "../../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
 
-BackendConfig::BackendConfig()
+BackendConfig::BackendConfig(const std::string& fileName)
 {
     el::Loggers::getLogger(ELPP_DEFAULT_LOGGER);
+    _fileName = fileName;
 }
 
 BackendConfig::~BackendConfig()
 {
+}
+
+void BackendConfig::Load()
+{
+
+}
+
+void BackendConfig::Save()
+{
+
+}
+
+std::string BackendConfig::GetUdpLogServer() const
+{
+    return _configFile.udpLogServer;
 }

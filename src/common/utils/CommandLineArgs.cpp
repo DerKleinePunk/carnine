@@ -6,7 +6,7 @@
 #endif
 
 #include "../../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
-#include "CommandLineArgs.h"
+#include "CommandLineArgs.hpp"
 
 namespace utils {
 

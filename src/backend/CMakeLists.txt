@@ -15,7 +15,7 @@ else()
 endif()
 
 ## Define the executable
-add_executable(${project_BIN} ${SRCS} ${MAIN_common_SRCS} ${easylogging_SRCS})
+add_executable(${project_BIN} ${SRCS} ${MAIN_common_SRCS} ${easylogging_SRCS} ${common_utils_SRCS} ${common_utils_SRCS_LOGGER})
 
 TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
 TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_NET_LIBRARIES} systemd )
