@@ -7,7 +7,7 @@
 
 #define MAXBUFFERSIZE 2048
 
-class MNSerial
+class BaseSerial
 {
     int _handle;
     std::string _portname;
@@ -30,8 +30,8 @@ class MNSerial
     virtual void AnalyseBuffer(int count) = 0;
 
   public:
-    MNSerial(const std::string& portname);
-    virtual ~MNSerial();
+    BaseSerial(const std::string& portname);
+    virtual ~BaseSerial();
 
     bool Open(const std::string& speed);
     bool Open(speed_t speed);

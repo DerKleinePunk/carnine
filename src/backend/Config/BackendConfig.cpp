@@ -20,7 +20,8 @@ using json = nlohmann::json;
 void to_json(json& j, const ConfigFile& p)
 {
     j = json{
-        { "UdpLogServer", p.udpLogServer },
+        { "UdpLogServer", p.udpLogServer},
+        { "PowerSupplyPort", p.powerSupplyPort},
     };
 }
 
@@ -31,6 +32,13 @@ void from_json(const json& j, ConfigFile& p)
         p.udpLogServer = j.at("UdpLogServer").get<std::string>();
     } else {
         p.udpLogServer = "";
+    }
+    
+    it_value = j.find("PowerSupplyPort");
+    if(it_value != j.end()) {
+        p.powerSupplyPort = j.at("PowerSupplyPort").get<std::string>();
+    } else {
+        p.powerSupplyPort = "/dev/ttyUSB0";
     }
 }
 
@@ -62,6 +70,8 @@ void BackendConfig::Load()
     } else {
         LOG(DEBUG) << "Create new config file";
         std::ofstream o(_fileName);
+        _configFile.udpLogServer = "";
+        _configFile.powerSupplyPort = "/dev/ttyUSB0";
         const json jConfig = _configFile;
         o << std::setw(4) << jConfig << std::endl;
         o.close();
@@ -75,4 +85,9 @@ void BackendConfig::Save()
 std::string BackendConfig::GetUdpLogServer() const
 {
     return _configFile.udpLogServer;
+}
+
+std::string BackendConfig::GetPowerSupplyPort() const
+{
+    return _configFile.powerSupplyPort;
 }

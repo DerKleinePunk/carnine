@@ -127,7 +127,7 @@ void InitIO()
 	BIT_CLEAR(&DDRD,5); // Dig2 Input
 	BIT_SET(&PORTD,5); // Dig2 Pullup On
 	DDRD=128+2;
-	PORTC=32+16; //Pin f�r selbst erhalt und KL15 setzen
+	PORTC=32+16; //Pin für selbst erhalt und KL15 setzen
 	DDRC=32;
 	PORTB=0;
 	DDRB=7;

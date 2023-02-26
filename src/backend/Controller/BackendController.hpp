@@ -1,11 +1,14 @@
 #pragma once
+#include "../communication/PowerSupplySerial.hpp"
+#include "../Config/BackendConfig.hpp"
 
 class BackendController
 {
-private:
-    /* data */
+    std::shared_ptr<PowerSupplySerial> _powerSerial;
+    BackendConfig* _config;
+    void PowerOffEvent();
 public:
-    BackendController();
+    BackendController(BackendConfig* config);
     ~BackendController();
 
     int Init();

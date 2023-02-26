@@ -94,26 +94,26 @@ int main(int argc, char** argv)
     int functionResult = 0;
     sd_event_source *timer_source = nullptr;
     uint64_t now;
-
+    utils::CommandLineArgs commandLineArgs;
+    
     std::cout << "Starting CarNiNe Backend " << PROJECT_VER << std::endl;
     START_EASYLOGGINGPP(argc, argv);
-
     std::string argv_str(argv[0]);
-    std::string base = argv_str.substr(0, argv_str.find_last_of("/"));
+    auto basePath = argv_str.substr(0, argv_str.find_last_of("/"));
 
-    if(utils::FileExists(base + "/loggerBackend.conf")) {
+    if(utils::FileExists(basePath + "/loggerBackend.conf")) {
         // Load configuration from file
-        el::Configurations conf(base + "/loggerBackend.conf");
+        el::Configurations conf(basePath + "/loggerBackend.conf");
         // Now all the loggers will use configuration from file and new loggers
         auto configValue = conf.get(el::Level::Global, el::ConfigurationType::Filename);
         auto fileName = configValue->value();
         if(fileName.at(0) == '.') {
-            fileName = base + fileName.substr(1, fileName.length() - 1);
+            fileName = basePath + fileName.substr(1, fileName.length() - 1);
             conf.setGlobally(el::ConfigurationType::Filename, fileName);
         }
-        // el::Loggers::setDefaultConfigurations(conf, true);
         std::cout << "Logfile is written at  " << fileName << std::endl;
-        el::Loggers::reconfigureAllLoggers(conf);
+        /*el::Loggers::reconfigureAllLoggers(conf);*/
+        el::Loggers::setDefaultConfigurations(conf, true);
     } else {
         sd_journal_print(LOG_WARNING, "Logger Config not Found");
         std::cout << "Logger Config not Found" << std::endl;
@@ -122,15 +122,14 @@ int main(int argc, char** argv)
     el::Helpers::setThreadName("Main");
     el::Loggers::getLogger(ELPP_DEFAULT_LOGGER);
     el::Helpers::installPreRollOutCallback(PreRollOutCallback);
+    
+    commandLineArgs.Pharse(argc, argv);
 
     signal(SIGINT, handleUserInterrupt);
     signal(SIGTERM, handleUserInterrupt);
     signal(SIGABRT, handleUserInterrupt);
 
     LOG(INFO) << "Starting CarNiNe Backend " << PROJECT_VER;
-
-    utils::CommandLineArgs commandLineArgs;
-    commandLineArgs.Pharse(argc, argv);
 
     const auto configFileName = commandLineArgs.GetParamValue("--c");
 
@@ -211,7 +210,7 @@ int main(int argc, char** argv)
         goto finish;
     }
     
-    backendController = new BackendController();
+    backendController = new BackendController(config);
 
     functionResult = backendController->Init();
     if(functionResult != 0) {
@@ -265,6 +264,7 @@ finish:
     }
 
     LOG(INFO) << "Last LogEntry";
+    el::Loggers::flushAll();
     el::Helpers::uninstallPreRollOutCallback();
 
     return exit_code;

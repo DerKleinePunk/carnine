@@ -1,11 +1,13 @@
 /*visit: http://www.teuniz.net/RS-232/*/
 
 #ifndef ELPP_DEFAULT_LOGGER
-#define ELPP_DEFAULT_LOGGER "MNSerial"
+#define ELPP_DEFAULT_LOGGER "BaseSerial"
 #endif
 #ifndef ELPP_CURR_FILE_PERFORMANCE_LOGGER_ID
 #define ELPP_CURR_FILE_PERFORMANCE_LOGGER_ID ELPP_DEFAULT_LOGGER
 #endif
+
+#include "BaseSerial.hpp"
 
 #include <errno.h> // Error number definitions
 #include <fcntl.h> // File control definitions
@@ -16,6 +18,7 @@
 #include <sys/stat.h>
 #include <termios.h> // POSIX terminal control definitions
 #include <unistd.h> // UNIX standard function definitions
+
 #include <chrono>
 #include <condition_variable>
 #include <fstream>
@@ -26,14 +29,13 @@
 #include "../../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
 #include "../../../modules/SDL2GuiHelper/common/json/json.hpp"
 #include "../../../modules/SDL2GuiHelper/common/utils/commonutils.h"
-#include "MNSerial.h"
 
 std::mutex m;
 std::condition_variable cv;
 
 #define MAXEVENTS 10
 
-void MNSerial::SetSpeed(speed_t speed)
+void BaseSerial::SetSpeed(speed_t speed)
 {
     struct termios Opt;
     tcgetattr(_handle, &Opt);
@@ -42,7 +44,7 @@ void MNSerial::SetSpeed(speed_t speed)
     tcsetattr(_handle, TCSANOW, &Opt);
 }
 
-void MNSerial::SetParity()
+void BaseSerial::SetParity()
 {
     struct termios options;
     tcgetattr(_handle, &options);
@@ -68,7 +70,7 @@ void MNSerial::SetParity()
     tcsetattr(_handle, TCSANOW, &options);
 }
 
-void MNSerial::Loop()
+void BaseSerial::Loop()
 {
     el::Helpers::setThreadName("MNSerial Reader");
 
@@ -116,7 +118,7 @@ void MNSerial::Loop()
     LOG(DEBUG) << "Thread is leaving the loop";
 }
 
-MNSerial::MNSerial(const std::string& portname) : _portname(portname)
+BaseSerial::BaseSerial(const std::string& portname) : _portname(portname)
 {
     el::Loggers::getLogger(ELPP_DEFAULT_LOGGER);
     _handle = -1;
@@ -129,14 +131,20 @@ MNSerial::MNSerial(const std::string& portname) : _portname(portname)
     _rawLogFileName = "";
 }
 
-MNSerial::~MNSerial()
+BaseSerial::~BaseSerial()
 {
     if(_rawLogFile.is_open()) {
         _rawLogFile.close();
     }
 }
 
-bool MNSerial::Open(const std::string& speed)
+/**
+ * @brief Open Serial for read and writting
+ *
+ * @param speed as string 
+ * @return 0 if all ok
+ */
+bool BaseSerial::Open(const std::string& speed)
 {
     LOG(DEBUG) << "Try Open with " << speed;
     speed_t speedInt = B1200;
@@ -161,7 +169,7 @@ bool MNSerial::Open(const std::string& speed)
     return Open(speedInt);
 }
 
-bool MNSerial::Open(speed_t speed)
+bool BaseSerial::Open(speed_t speed)
 {
     _run = true;
     LOG(DEBUG) << "Try open " << _portname;
@@ -186,12 +194,12 @@ bool MNSerial::Open(speed_t speed)
     return true;
 }
 
-int MNSerial::GetHandle() const
+int BaseSerial::GetHandle() const
 {
     return _handle;
 }
 
-int MNSerial::Read()
+int BaseSerial::Read()
 {
     char buff[512];
     auto length = read(_handle, buff, sizeof(buff));
@@ -201,7 +209,7 @@ int MNSerial::Read()
     return length;
 }
 
-int MNSerial::Write(const std::string& message)
+int BaseSerial::Write(const std::string& message)
 {
     auto length = write(_handle, message.c_str(), message.size());
     if(VLOG_IS_ON(1)) {
@@ -223,8 +231,17 @@ int MNSerial::Write(const std::string& message)
     return length;
 }
 
-int MNSerial::Start()
+/**
+ * @brief Starts the Serial Reading
+ *
+ * @return 0 if all ok
+ */
+int BaseSerial::Start()
 {
+    if(_handle == -1) {
+        LOG(ERROR) << "call opem befor start";
+        return -99;
+    }
     epoll_event event;
     memset(&event, 0, sizeof(epoll_event));
 
@@ -239,13 +256,13 @@ int MNSerial::Start()
     _epoll_events = new epoll_event[MAXEVENTS];
 
     std::unique_lock<std::mutex> lk(m);
-    loop_thread_ = std::thread(&MNSerial::Loop, this);
+    loop_thread_ = std::thread(&BaseSerial::Loop, this);
     cv.wait(lk);
     LOG(DEBUG) << "Serial is open and Thread Running";
     return 0;
 }
 
-void MNSerial::Close()
+void BaseSerial::Close()
 {
     if(_handle == -1) return;
 
@@ -262,7 +279,7 @@ void MNSerial::Close()
     _handle = -1;
 }
 
-void MNSerial::SetRawLogFile(const std::string& name)
+void BaseSerial::SetRawLogFile(const std::string& name)
 {
     _rawLogFileName = name;
 }

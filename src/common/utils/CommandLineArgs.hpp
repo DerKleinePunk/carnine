@@ -10,7 +10,7 @@ namespace utils
     private:
         std::map<std::string,std::string> _parameterWithValue;
         std::vector<std::string> _parameter;
-        std::string basePath;
+        std::string _basePath;
     public:
         CommandLineArgs();
         ~CommandLineArgs();
@@ -19,6 +19,7 @@ namespace utils
         bool HasParamWithValue(const std::string& key);
         bool HasParam(const std::string& key);
         std::string GetParamValue(const std::string& key);
+        std::string GetBasePath();
     };
 
 }

@@ -29,7 +29,7 @@ namespace utils {
         }
 
         std::string argv_str(argv[0]);
-        basePath = argv_str.substr(0, argv_str.find_last_of("/"));
+        _basePath = argv_str.substr(0, argv_str.find_last_of("/"));
 
         if (argc == 1) {
             return;
@@ -79,6 +79,10 @@ namespace utils {
             return it->second;
         }
         return std::string("");
+    }
+
+    std::string CommandLineArgs::GetBasePath() {
+        return _basePath;
     }
 
 }//Namespace
