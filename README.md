@@ -23,3 +23,7 @@ Without this million html pages and line of codes this software doesn't work.
 
 look at DebianPackages.txt
 [see](https://www.carnine.de/depends.html)
+
+## Documentation (German)
+
+[Index](documents/index.md)
