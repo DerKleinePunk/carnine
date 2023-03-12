@@ -1,3 +1,6 @@
 [submodule "modules/SDL2GuiHelper"]
 	path = modules/SDL2GuiHelper
 	url = https://github.com/DerKleinePunk/SDL2GuiHelper
+[submodule "modules/PiGPIOHelper"]
+	path = modules/PiGPIOHelper
+	url = https://github.com/DerKleinePunk/PiGPIOHelper.git
