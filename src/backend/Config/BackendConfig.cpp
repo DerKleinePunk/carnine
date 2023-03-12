@@ -20,8 +20,8 @@ using json = nlohmann::json;
 void to_json(json& j, const ConfigFile& p)
 {
     j = json{
-        { "UdpLogServer", p.udpLogServer},
-        { "PowerSupplyPort", p.powerSupplyPort},
+        { "UdpLogServer", p.udpLogServer },
+        { "PowerSupplyPort", p.powerSupplyPort },
     };
 }
 
@@ -33,7 +33,7 @@ void from_json(const json& j, ConfigFile& p)
     } else {
         p.udpLogServer = "";
     }
-    
+
     it_value = j.find("PowerSupplyPort");
     if(it_value != j.end()) {
         p.powerSupplyPort = j.at("PowerSupplyPort").get<std::string>();

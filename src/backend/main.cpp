@@ -16,8 +16,8 @@
 #include "../common/utils/CommandLineArgs.hpp"
 #include "../common/utils/LogNetDispatcher.hpp"
 #include "../common/version.hpp"
-#include "Controller/BackendController.hpp"
 #include "Config/BackendConfig.hpp"
+#include "Controller/BackendController.hpp"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -66,24 +66,26 @@ void handleUserInterrupt(int sig)
 BackendConfig* config = nullptr;
 BackendController* backendController = nullptr;
 
-//Time Callback called every ?
+// Time Callback called every ?
 static const uint64_t stats_every_usec = 10 * 1000000;
 /* These counters are reset in display_stats(). */
 static size_t received_counter = 0, sent_counter = 0;
 
 /* display_stats is expected to be called by the event loop. */
-static int display_stats(sd_event_source *es, uint64_t now, void *userdata) {
-  
-    sd_notifyf(false, "STATUS=%zu telegrams send in the last %d seconds.", sent_counter, (unsigned int)(stats_every_usec / 1000000));
-    sd_notifyf(false, "STATUS=%zu telegrams received in the last %d seconds.", received_counter, (unsigned int)(stats_every_usec / 1000000));
-    
+static int display_stats(sd_event_source* es, uint64_t now, void* userdata)
+{
+    sd_notifyf(false, "STATUS=%zu telegrams send in the last %d seconds.", sent_counter,
+               (unsigned int)(stats_every_usec / 1000000));
+    sd_notifyf(false, "STATUS=%zu telegrams received in the last %d seconds.", received_counter,
+               (unsigned int)(stats_every_usec / 1000000));
+
     if(backendController != nullptr) {
         backendController->CheckSystem();
     }
-    
+
     sd_event_source_set_time(es, now + stats_every_usec); /* reschedules */
     sent_counter = received_counter = 0;
-    
+
     return 0;
 }
 
@@ -92,10 +94,10 @@ int main(int argc, char** argv)
     int exit_code = EXIT_SUCCESS;
     int eventLoopResult = 0;
     int functionResult = 0;
-    sd_event_source *timer_source = nullptr;
+    sd_event_source* timer_source = nullptr;
     uint64_t now;
     utils::CommandLineArgs commandLineArgs;
-    
+
     std::cout << "Starting CarNiNe Backend " << PROJECT_VER << std::endl;
     START_EASYLOGGINGPP(argc, argv);
     std::string argv_str(argv[0]);
@@ -122,7 +124,7 @@ int main(int argc, char** argv)
     el::Helpers::setThreadName("Main");
     el::Loggers::getLogger(ELPP_DEFAULT_LOGGER);
     el::Helpers::installPreRollOutCallback(PreRollOutCallback);
-    
+
     commandLineArgs.Pharse(argc, argv);
 
     signal(SIGINT, handleUserInterrupt);
@@ -147,7 +149,8 @@ int main(int argc, char** argv)
 
         if(!config->GetUdpLogServer().empty()) {
             el::Helpers::installLogDispatchCallback<LogNetDispatcher>("NetworkDispatcher");
-            auto dispatcher = el::Helpers::logDispatchCallback<LogNetDispatcher>("NetworkDispatcher");
+            auto dispatcher =
+            el::Helpers::logDispatchCallback<LogNetDispatcher>("NetworkDispatcher");
             dispatcher->setEnabled(true);
             dispatcher->updateServer(config->GetUdpLogServer(), 9090, 8001);
         }
@@ -209,7 +212,7 @@ int main(int argc, char** argv)
         exit_code = 204;
         goto finish;
     }
-    
+
     backendController = new BackendController(config);
 
     functionResult = backendController->Init();
@@ -224,7 +227,7 @@ int main(int argc, char** argv)
     sd_event_add_time(event, &timer_source, CLOCK_MONOTONIC, now + stats_every_usec, 0, display_stats, NULL);
 
     functionResult = sd_event_source_set_enabled(timer_source, SD_EVENT_ON);
-    if( functionResult < 0) {
+    if(functionResult < 0) {
         sd_journal_print(LOG_ERR, "Cannot enabled timer %d", functionResult);
     }
 

@@ -12,7 +12,7 @@ class BackendConfig
     std::string _fileName;
     ConfigFile _configFile;
 
-public:
+  public:
     BackendConfig(const std::string& fileName);
     ~BackendConfig();
 
@@ -22,4 +22,3 @@ public:
     std::string GetUdpLogServer() const;
     std::string GetPowerSupplyPort() const;
 };
-

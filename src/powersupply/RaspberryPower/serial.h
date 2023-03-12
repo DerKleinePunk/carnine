@@ -3,7 +3,7 @@
  *
  * Created: 16.08.2017 04:30:50
  *  Author: michael.nenninger
- */ 
+ */
 
 #include <stdbool.h>
 #include <util/atomic.h>

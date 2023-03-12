@@ -141,7 +141,7 @@ BaseSerial::~BaseSerial()
 /**
  * @brief Open Serial for read and writting
  *
- * @param speed as string 
+ * @param speed as string
  * @return 0 if all ok
  */
 bool BaseSerial::Open(const std::string& speed)

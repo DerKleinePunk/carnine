@@ -1,6 +1,7 @@
 #pragma once
 
 #include <termios.h>
+
 #include <fstream>
 #include <string>
 #include <thread>

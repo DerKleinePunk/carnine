@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+
 #include "../../common/communication/BaseSerial.hpp"
 
 typedef std::function<void()> powerOffCallbackFunction;
@@ -16,7 +17,8 @@ class PowerSupplySerial : public BaseSerial
     void HandlePiAlive(char* value);
     void HandleKlemme15(char value);
     void PowerOffSystemdBus(int sec);
-public:
+
+  public:
     PowerSupplySerial(const std::string& portname, powerOffCallbackFunction callback);
     ~PowerSupplySerial();
     void ShutdownSystem();

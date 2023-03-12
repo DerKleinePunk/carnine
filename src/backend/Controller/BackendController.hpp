@@ -1,13 +1,14 @@
 #pragma once
-#include "../communication/PowerSupplySerial.hpp"
 #include "../Config/BackendConfig.hpp"
+#include "../communication/PowerSupplySerial.hpp"
 
 class BackendController
 {
     std::shared_ptr<PowerSupplySerial> _powerSerial;
     BackendConfig* _config;
     void PowerOffEvent();
-public:
+
+  public:
     BackendController(BackendConfig* config);
     ~BackendController();
 
@@ -17,5 +18,3 @@ public:
 
     void CheckSystem();
 };
-
-
