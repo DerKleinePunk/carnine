@@ -78,7 +78,7 @@ fi
 echo "we are here"
 pwd
 
-DIRECTORY="SDL2-2.0.22"
+DIRECTORY="SDL2-2.26.4"
 if [ ! -d "$DIRECTORY" ]; then
 	wget -N https://www.libsdl.org/release/$DIRECTORY.tar.gz
 	exitCode=$?
