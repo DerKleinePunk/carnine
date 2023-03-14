@@ -17,7 +17,7 @@ include(CheckTypeSize)
 include(CheckIncludeFiles)
 
 ## Use the variable PROJECT_NAME for changing the target name
-SET ( PROJECT_NAME "ops4bos" )
+SET ( PROJECT_NAME "CarNiNe" )
 
 ## Version depens on
 SET (SDL2_VER "2.0.12")

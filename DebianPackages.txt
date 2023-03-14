@@ -1,0 +1,16 @@
+libavutil-dev
+libavcodec-dev
+libavformat-dev
+libswscale-dev
+automake
+libpulse-dev
+libudev-dev
+libts-dev
+libsamplerate0-dev
+python3-pip
+libdrm-dev
+libgbm-dev
+libasound2-dev
+cmake
+librsvg2-dev
+libsystemd-dev
