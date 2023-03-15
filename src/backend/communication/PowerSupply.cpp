@@ -200,6 +200,10 @@ void PowerSupplySerial::HandleSystemState(char value)
         LOG(INFO) << "PowerSupply State STATE_IDLE";
     } else if(value - 0x30 == STATE_POWERON) {
         LOG(INFO) << "PowerSupply State STATE_POWERON";
+    } else if(value - 0x30 == STATE_PIBOOT) {
+        LOG(INFO) << "PowerSupply State STATE_PIBOOT";
+    } else if(value - 0x30 == STATE_RUN) {
+        LOG(INFO) << "PowerSupply State STATE_RUN";
     } else {
         LOG(INFO) << "PowerSupply State " << value;
     }
@@ -248,6 +252,11 @@ void PowerSupplySerial::ShutdownSystem()
 
 void PowerSupplySerial::PowerOnAmp()
 {
-    // Todo make Config able
+    //TODO make Config able
     Write("3");
+}
+
+void PowerSupplySerial::ServiceModeOn()
+{
+    Write("!");
 }

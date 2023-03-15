@@ -23,4 +23,5 @@ class PowerSupplySerial : public BaseSerial
     ~PowerSupplySerial();
     void ShutdownSystem();
     void PowerOnAmp();
+    void ServiceModeOn();
 };

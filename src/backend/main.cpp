@@ -89,12 +89,21 @@ static int display_stats(sd_event_source* es, uint64_t now, void* userdata)
     return 0;
 }
 
+static int pipe_receive(sd_event_source *es, int fd, uint32_t revents, void *userdata){
+    ++received_counter;
+    
+    //WorkerMessage* message = nullptr;
+
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     int exit_code = EXIT_SUCCESS;
     int eventLoopResult = 0;
     int functionResult = 0;
     sd_event_source* timer_source = nullptr;
+    sd_event_source* event_source = nullptr;
     uint64_t now;
     utils::CommandLineArgs commandLineArgs;
 
@@ -231,6 +240,14 @@ int main(int argc, char** argv)
         sd_journal_print(LOG_ERR, "Cannot enabled timer %d", functionResult);
     }
 
+    functionResult = sd_event_add_io(event, &event_source, pipefd[0], EPOLLIN | EPOLLET, pipe_receive, nullptr);
+    if ( functionResult < 0) {
+        (void) sd_journal_print(LOG_CRIT, "event_add_io failed for pipe no: %d", functionResult);
+        exit_code = 72;
+        goto finish;
+    }
+    sd_event_source_set_description(event_source, "CarNineMessageIO");
+
     sd_journal_print(LOG_INFO, "Written by M. Nenninger http://www.carnine.de");
     sd_journal_print(LOG_INFO, "Done setting everything up. Serving.");
 
@@ -265,6 +282,17 @@ finish:
     if(config != nullptr) {
         delete config;
     }
+
+    if (timer_source != nullptr) {
+        sd_event_source_set_enabled(timer_source, SD_EVENT_OFF);
+        timer_source = sd_event_source_unref(timer_source);
+    }
+
+    if(event_source != nullptr) {
+        event_source = sd_event_source_unref(event_source);
+    }
+
+    event = sd_event_unref(event);
 
     LOG(INFO) << "Last LogEntry";
     el::Loggers::flushAll();

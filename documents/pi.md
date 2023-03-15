@@ -1,34 +1,17 @@
-#PI
+# PI
 
-## Sound
+## Display
 
-```bash
-aplay /usr/share/sounds/alsa/Noise.wav
-speaker-test -c2
-```
+I use an [7 inch Waveshare](https://www.waveshare.com/wiki/7inch_HDMI_LCD_(H))
 
-If you install Lite on RPI4 muss install pulseaudio for get HDMI Sound get working (I found no other Way)
 
-```bash
-sudo apt-get install pulseaudio pulseaudio-utils
-```
-
-When Knacks try disable 
-
-```bash
-/etc/pulse/default.pa
-#load-module module-suspend-on-idle
-```
-
-## Netteil Dokumentation
-
-SerialPort serial0 -> Kommunikation Netzteil
+## Netzteil Dokumentation
 
 dtoverlay gpio-poweroff,active_low=1,gpiopin=5 ->  in die /boot/config.txt eintragen ->
 Mit Dig3 verbinden damit der Halt zustand erkannt werden kann. Sonst gilt ein Timeout in AVR Software
 Natürlich kann man jeden Anderen GPIO auch verwenden. Nur auf dem Netzteil ist fix es sei den man
 Ändert den AVR Code.
-https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README Dokumentation für den PI.
+[README](https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README) Dokumentation für den PI.
 
 
 ## HDD M2 SSD via USB3
@@ -58,8 +41,3 @@ sudo chmod 775 /mnt/hdd
 wget -N https://www.libsdl.org/release/SDL2-2.0.22.tar.gz
 tar -xzf SDL2-2.0.22.tar.gz
 
-
-###Links
-
-https://www.derpade.de/raspberry-pi-swap-auf-externen-usb-stick-auslagern/
-https://www.shellbefehle.de/befehle/chown/
