@@ -13,6 +13,11 @@ chmod +x build.sh
 ./build.sh
 ```
 
+The Build script use apt-get for Depency and will Build LibOsmScout in Write Version.
+SDL2 ist also Build.
+
+So the Script ist only Work Corrent on System that have Package Manager apt
+
 ## Thanks
 
 Thanks to all the opensource and Tutorial writer on this world.
