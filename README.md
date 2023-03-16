@@ -31,7 +31,7 @@ Without this million html pages and line of codes this software doesn't work.
 + [cairo](https://cairographics.org/)
 + [FFmpeg](http://ffmpeg.org/)
 
-look at (DebianPackages)[DebianPackages.txt]
+look at [DebianPackages](DebianPackages.txt)
 
 also [see](https://www.carnine.de/depends.html)
 
