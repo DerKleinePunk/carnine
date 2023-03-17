@@ -15,6 +15,7 @@
 #include "SocketController.hpp"
 
 #include "../../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
+#include "../messages/WorkerMessage.hpp"
 
 void SocketController::Loop() {
     el::Helpers::setThreadName("SocketController");
@@ -88,7 +89,9 @@ void SocketController::Loop() {
         }
     }
     
-
+    for(std::size_t pos = 2; pos < _watchSockets.size(); pos++) {
+        close(_watchSockets[pos]);
+    }
     LOG(INFO) << "Socket thread is stopped";
 }
 
@@ -161,6 +164,16 @@ void SocketController::HandleReceived(int socket)
     std::string bufferText(buffer);
 
     LOG(INFO) << "sender " << sender << " " << bufferText;
+
+    if(bufferText == "die\n") {
+        auto message = new WorkerMessage();
+        message->_messageType = "die";
+        int rc = write(_backendPipe, &message, sizeof (message));
+        /*if (rc != sizeof (message)){
+            sd_journal_print(LOG_ERR, "Error when notifying addition of drive on '%s'. Writing to pipe failed: %s.", strerror(errno), mountPoint.c_str());
+        }*/
+    }
+    delete [] buffer;
 }
 
 void SocketController::HandleClosed(int socket)
@@ -176,12 +189,13 @@ void SocketController::HandleClosed(int socket)
     }
 }
 
-SocketController::SocketController(int listenSocket)
+SocketController::SocketController(int listenSocket, int backendPipe)
 {
     el::Loggers::getLogger(ELPP_DEFAULT_LOGGER);
     _listenSocket = listenSocket;
     _internPipe[0] = -1;
     _internPipe[1] = -1;
+    _backendPipe = backendPipe;
 }
 
 SocketController::~SocketController()

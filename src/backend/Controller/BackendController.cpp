@@ -59,6 +59,9 @@ int BackendController::Start()
 void BackendController::Stop()
 {
     LOG(DEBUG) << "Stop ->";
+    if(_powerSerial != nullptr) {
+        _powerSerial->Close();
+    }
     LOG(DEBUG) << "Stop <-";
 }
 

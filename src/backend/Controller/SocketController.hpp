@@ -14,13 +14,15 @@ private:
     int _internPipe[2];
     std::vector<int> _watchSockets;
     pollfd _fds[7]; //Max clients Listen + 2;
+    int _backendPipe;
+
     void Loop();
     void HandleAccept();
     void BuildFds();
     void HandleReceived(int socket);
     void HandleClosed(int socket);
 public:
-    SocketController(int listenSocket);
+    SocketController(int listenSocket, int backendPipe);
     ~SocketController();
 
     int Start();

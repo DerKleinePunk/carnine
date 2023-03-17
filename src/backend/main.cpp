@@ -25,6 +25,7 @@
 #include "Config/BackendConfig.hpp"
 #include "Controller/BackendController.hpp"
 #include "Controller/SocketController.hpp"
+#include "messages/WorkerMessage.hpp"
 
 char socketPath[] = "/tmp/CarNiNe.sock";
 
@@ -102,7 +103,19 @@ static int display_stats(sd_event_source* es, uint64_t now, void* userdata)
 static int pipe_receive(sd_event_source *es, int fd, uint32_t revents, void *userdata){
     ++received_counter;
     
-    //WorkerMessage* message = nullptr;
+    WorkerMessage* message = nullptr;
+    if(read(fd, &message, sizeof(message)) != sizeof(message)) {
+        LOG(ERROR) << "Read error on pipe";
+        sd_journal_print(LOG_ERR, "Read error on pipe");
+    } else {
+        if(message->_messageType == "die") {
+            auto const result = sd_event_exit(event, 0);
+            std::cout << "sd_event_exit " << result << std::endl;
+        } else {
+            //TODO
+        }
+        delete message;
+    }
 
     return 0;
 }
@@ -290,7 +303,7 @@ int main(int argc, char** argv)
         goto finish;
     }
 
-    socketController = new SocketController(server_socket);
+    socketController = new SocketController(server_socket, pipefd[1]);
     backendController = new BackendController(config);
 
     functionResult = backendController->Init();

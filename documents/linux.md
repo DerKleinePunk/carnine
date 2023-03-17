@@ -43,3 +43,6 @@ sd_is_socket()
 ## Commandline Tests
 
 nc -U /tmp/CarNiNe.sock
+
+valgrind --tool=memcheck ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
+valgrind --tool=memcheck --leak-check=full ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
