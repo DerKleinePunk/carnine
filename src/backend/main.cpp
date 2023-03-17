@@ -10,6 +10,12 @@
 #include <systemd/sd-journal.h>
 
 #include <iostream>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <fcntl.h> 
 
 #include "../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
 #include "../../modules/SDL2GuiHelper/common/utils/commonutils.h"
@@ -18,6 +24,9 @@
 #include "../common/version.hpp"
 #include "Config/BackendConfig.hpp"
 #include "Controller/BackendController.hpp"
+#include "Controller/SocketController.hpp"
+
+char socketPath[] = "/tmp/CarNiNe.sock";
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -65,6 +74,7 @@ void handleUserInterrupt(int sig)
 
 BackendConfig* config = nullptr;
 BackendController* backendController = nullptr;
+SocketController* socketController = nullptr;
 
 // Time Callback called every ?
 static const uint64_t stats_every_usec = 10 * 1000000;
@@ -102,9 +112,15 @@ int main(int argc, char** argv)
     int exit_code = EXIT_SUCCESS;
     int eventLoopResult = 0;
     int functionResult = 0;
+    int fd_count = -1;
+    int server_socket = -1;
+
+    int pipefd[2]; // Backend Communikation Pipe
     sd_event_source* timer_source = nullptr;
     sd_event_source* event_source = nullptr;
+    
     uint64_t now;
+
     utils::CommandLineArgs commandLineArgs;
 
     std::cout << "Starting CarNiNe Backend " << PROJECT_VER << std::endl;
@@ -222,12 +238,65 @@ int main(int argc, char** argv)
         goto finish;
     }
 
+    fd_count = sd_listen_fds(0);
+    if (fd_count == 1) {
+        server_socket = SD_LISTEN_FDS_START;
+        if (!sd_is_socket_unix(server_socket, SOCK_STREAM, -1, NULL, 0)){
+            sd_journal_print(LOG_ERR, "socket is not unix STREAM");
+            exit_code = 205;
+            goto finish;
+        }
+    } else if (fd_count > 1) {
+        sd_journal_print(LOG_ERR, "backendController sytemd Config Error more than one Socket");
+        exit_code = 205;
+        goto finish;
+    } else if(fd_count < 0) {
+        sd_journal_print(LOG_ERR, "sd_listen_fds %d", fd_count);
+        exit_code = 205;
+        goto finish;
+    } else {
+        //Create Socket self (Debug / start without Systemd)
+        unlink(socketPath); //If already exits
+        server_socket = socket(AF_UNIX, SOCK_STREAM, PF_UNSPEC);
+        sockaddr_un name;
+        memset(&name, 0, sizeof(sockaddr_un));
+
+        name.sun_family = AF_UNIX;
+        strncpy(name.sun_path, socketPath, sizeof(name.sun_path) - 1);
+
+        functionResult = bind(server_socket, reinterpret_cast<const sockaddr*>(&name), sizeof(sockaddr_un));
+
+        if(functionResult == -1) {
+            LOG(ERROR) << "bind failed " << functionResult;
+            sd_journal_print(LOG_ERR, "bind %d", functionResult);
+            exit_code = 205;
+            goto finish;
+        }
+
+        functionResult = listen(server_socket, 5);
+        if (functionResult == -1) {
+            LOG(ERROR) << "listen failed " << functionResult;
+            sd_journal_print(LOG_ERR, "listen %d", functionResult);
+            exit_code = 205;
+            goto finish;
+        }
+
+    }
+
+    functionResult = pipe2(pipefd, O_CLOEXEC|O_NONBLOCK);
+    if ( functionResult != 0) {
+        sd_journal_print(LOG_ERR, "Cannot create the pipe %d", functionResult);
+        exit_code = 206;
+        goto finish;
+    }
+
+    socketController = new SocketController(server_socket);
     backendController = new BackendController(config);
 
     functionResult = backendController->Init();
     if(functionResult != 0) {
         sd_journal_print(LOG_ERR, "backendController Init %d", functionResult);
-        exit_code = 205;
+        exit_code = 207;
         goto finish;
     }
 
@@ -240,13 +309,13 @@ int main(int argc, char** argv)
         sd_journal_print(LOG_ERR, "Cannot enabled timer %d", functionResult);
     }
 
-    functionResult = sd_event_add_io(event, &event_source, pipefd[0], EPOLLIN | EPOLLET, pipe_receive, nullptr);
+    functionResult = sd_event_add_io(event, &event_source, pipefd[0], EPOLLIN, pipe_receive, nullptr);
     if ( functionResult < 0) {
         (void) sd_journal_print(LOG_CRIT, "event_add_io failed for pipe no: %d", functionResult);
         exit_code = 72;
         goto finish;
     }
-    sd_event_source_set_description(event_source, "CarNineMessageIO");
+    sd_event_source_set_description(event_source, "CarNiNe Message Io");
 
     sd_journal_print(LOG_INFO, "Written by M. Nenninger http://www.carnine.de");
     sd_journal_print(LOG_INFO, "Done setting everything up. Serving.");
@@ -254,6 +323,13 @@ int main(int argc, char** argv)
     functionResult = backendController->Start();
     if(functionResult != 0) {
         sd_journal_print(LOG_ERR, "backendController Start %d", functionResult);
+        exit_code = 206;
+        goto finish;
+    }
+
+    functionResult = socketController->Start();
+     if(functionResult != 0) {
+        sd_journal_print(LOG_ERR, "socketController Start %d", functionResult);
         exit_code = 206;
         goto finish;
     }
@@ -279,6 +355,10 @@ finish:
         delete backendController;
     }
 
+    if(socketController != nullptr) {
+        delete socketController;
+    }
+
     if(config != nullptr) {
         delete config;
     }
@@ -297,6 +377,8 @@ finish:
     LOG(INFO) << "Last LogEntry";
     el::Loggers::flushAll();
     el::Helpers::uninstallPreRollOutCallback();
+
+    unlink(socketPath);
 
     return exit_code;
 }

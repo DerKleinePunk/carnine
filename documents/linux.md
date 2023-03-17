@@ -10,3 +10,33 @@ https://www.shellbefehle.de/befehle/chown/
 https://beej.us/guide/bgipc/html/split/mq.html
 
 https://www.unix.com/unix-for-advanced-and-expert-users/110170-epoll-sockets-threads.html
+
+https://lloydrochester.com/post/unix/systemd_sockets/
+
+https://gist.github.com/alexandruc/2350954
+
+https://www.geeksforgeeks.org/socket-programming-in-cc-handling-multiple-clients-on-server-without-multi-threading/
+
+https://github.com/eliben/code-for-blog/blob/master/2017/async-socket-server/epoll-server.c
+
+https://github.com/42ity/fty-common-socket/blob/master/src/fty_common_socket_basic_mailbox_server.cc
+
+https://eklitzke.org/systemd-socket-activation
+
+https://github.com/42ity/fty-common-socket/blob/master/src/fty_common_socket_basic_mailbox_server.cc
+
+https://idea.popcount.org/2019-11-06-creating-sockets/
+
+https://www.smnd.sk/anino/programming/c/unix_examples/poll.html
+
+https://eklitzke.org/systemd-socket-activation
+## Search Words
+
+sd_listen_fds_with_names
+sd_listen_fds
+ListenUSBFunction
+sd_is_socket()
+
+## Commandline Tests
+
+nc -U /tmp/CarNiNe.sock
