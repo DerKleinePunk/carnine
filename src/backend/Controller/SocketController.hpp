@@ -7,7 +7,7 @@
 
 class SocketController
 {
-private:
+private:    
     int _listenSocket;
     std::thread _loopThread;
     bool _run;
@@ -17,6 +17,8 @@ private:
     void Loop();
     void HandleAccept();
     void BuildFds();
+    void HandleReceived(int socket);
+    void HandleClosed(int socket);
 public:
     SocketController(int listenSocket);
     ~SocketController();

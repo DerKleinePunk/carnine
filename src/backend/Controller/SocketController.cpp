@@ -8,6 +8,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
+#include <sys/ioctl.h>
+#include <pwd.h>
+#include <fcntl.h> 
 
 #include "SocketController.hpp"
 
@@ -41,14 +44,13 @@ void SocketController::Loop() {
 
         // Run through the existing connections looking for data to be read
         for (std::size_t pos = 0; pos < _watchSockets.size(); pos++) {
-
             if(_fds[pos].revents == 0)
             {
                 //this socket nothing to do
                 continue;
             }
 
-            if(_fds[pos].revents != POLLIN)
+            if(!(_fds[pos].revents & POLLIN) && !(_fds[pos].revents & POLLHUP))
             {
                 //printf("  Error! revents = %d\n", fds[i].revents);
                 //Todo Handle it
@@ -66,37 +68,20 @@ void SocketController::Loop() {
                 }
             } else {
               try {
-                    // We received request
-
-                    // get credential info
-                    struct ucred cred;
-                    socklen_t    lenCredStruct = sizeof(struct ucred);
-
-                    if (getsockopt(_fds[pos].fd, SOL_SOCKET, SO_PEERCRED, &cred, &lenCredStruct) == -1) {
-                        throw std::runtime_error("Impossible to get sender");
-                    }
-
-                    /*
-                    struct passwd* pws;
-                    pws = getpwuid(cred.uid);
-
-                    std::string sender(pws->pw_name);
-                    */
+                if(_fds[pos].revents & POLLIN) {
+                    HandleReceived(_fds[pos].fd);
+                }
+                if(_fds[pos].revents & POLLHUP) {
+                    HandleClosed(_fds[pos].fd);
+                    BuildFds();
+                }
               }
               catch(...)
               {
                 if (!_run) {
                         break;
                     }
-
-                    // close the connection in case of error
-                    close(_fds[pos].fd);
-                    for(const auto entry : _watchSockets) {
-                        if(entry == _fds[pos].fd) {
-                            _watchSockets.erase(_watchSockets.begin()+pos);
-                            break;
-                        }
-                    }
+                    HandleClosed(_fds[pos].fd);
                     BuildFds();
               }
             }
@@ -134,10 +119,61 @@ void SocketController::BuildFds()
     memset(_fds, 0 , sizeof(_fds));
     int pos = 0;
     for(const auto entry : _watchSockets) {
+        LOG(INFO) << "watch fd " << entry;
         _fds[pos].fd = entry;
-        _fds[pos].events = POLLIN;
+        if(pos > 1)
+        {
+            _fds[pos].events = POLLIN|POLLHUP;
+        }
+        else
+        {
+            _fds[pos].events = POLLIN;
+        }
+        
         pos++;
     }    
+}
+
+void SocketController::HandleReceived(int socket)
+{
+    // We received request
+
+    // get credential info
+    struct ucred cred;
+    socklen_t    lenCredStruct = sizeof(struct ucred);
+
+    if (getsockopt(socket, SOL_SOCKET, SO_PEERCRED, &cred, &lenCredStruct) == -1) {
+        throw std::runtime_error("Impossible to get sender");
+    }
+    
+    passwd* pws;
+    pws = getpwuid(cred.uid);
+
+    std::string sender(pws->pw_name);
+
+    int bytes;
+    ioctl(socket, FIONREAD, &bytes);
+
+    auto buffer = new char[bytes+1];
+    memset(buffer, 0, bytes+1);
+    auto count = read(socket, buffer, bytes);
+
+    std::string bufferText(buffer);
+
+    LOG(INFO) << "sender " << sender << " " << bufferText;
+}
+
+void SocketController::HandleClosed(int socket)
+{
+    close(socket);
+    int pos = 0;
+    for(const auto entry : _watchSockets) {
+        if(entry == socket) {
+            _watchSockets.erase(_watchSockets.begin()+pos);
+            break;
+        }
+        pos++;
+    }
 }
 
 SocketController::SocketController(int listenSocket)

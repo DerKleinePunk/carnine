@@ -30,6 +30,9 @@ https://idea.popcount.org/2019-11-06-creating-sockets/
 https://www.smnd.sk/anino/programming/c/unix_examples/poll.html
 
 https://eklitzke.org/systemd-socket-activation
+
+http://0pointer.de/blog/projects/socket-activation.html
+
 ## Search Words
 
 sd_listen_fds_with_names
