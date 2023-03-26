@@ -8,6 +8,7 @@
 #include "BackendController.hpp"
 
 #include "../../../modules/SDL2GuiHelper/common/easylogging/easylogging++.h"
+#include "../../common/messages/BackendMessages.hpp"
 
 void BackendController::PowerOffEvent()
 {
@@ -67,6 +68,22 @@ void BackendController::Stop()
 
 void BackendController::CheckSystem()
 {
-    LOG(DEBUG) << "CheckSystem ->";
+    LOG(INFO) << "CheckSystem ->";
     LOG(DEBUG) << "CheckSystem <-";
+}
+
+void BackendController::HandleWorkerMessage(WorkerMessage* message)
+{
+    LOG(INFO) << "HandleWorkerMessage " << message->_messageType;
+    if(message->_messageType == worker_message_type::json) {
+        baseMessage messageJson = message->_messageJson;
+        if(messageJson.type == backend_message_type::powerSupplyWatchdog) {
+            powerSupplyWatchdog messageIntern = message->_messageJson;
+            if(_powerSerial != nullptr && messageIntern.state == false) {
+                _powerSerial->ServiceModeOn();
+            }
+        }
+    }
+
+    LOG(DEBUG) << "HandleWorkerMessage <-";
 }

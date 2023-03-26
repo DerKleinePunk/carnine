@@ -14,3 +14,7 @@ libasound2-dev
 cmake
 librsvg2-dev
 libsystemd-dev
+libv4l-dev
+libjpeg-dev
+libuvc0
+libgles2-mesa-dev

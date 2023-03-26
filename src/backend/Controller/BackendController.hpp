@@ -1,6 +1,7 @@
 #pragma once
 #include "../Config/BackendConfig.hpp"
 #include "../communication/PowerSupplySerial.hpp"
+#include "../messages/WorkerMessage.hpp"
 
 class BackendController
 {
@@ -17,4 +18,6 @@ class BackendController
     void Stop();
 
     void CheckSystem();
+
+    void HandleWorkerMessage(WorkerMessage* message);
 };

@@ -108,11 +108,13 @@ static int pipe_receive(sd_event_source *es, int fd, uint32_t revents, void *use
         LOG(ERROR) << "Read error on pipe";
         sd_journal_print(LOG_ERR, "Read error on pipe");
     } else {
-        if(message->_messageType == "die") {
+        if(message->_messageType == worker_message_type::die) {
             auto const result = sd_event_exit(event, 0);
             std::cout << "sd_event_exit " << result << std::endl;
         } else {
-            //TODO
+            if(backendController != nullptr) {
+                backendController->HandleWorkerMessage(message);
+            }
         }
         delete message;
     }
