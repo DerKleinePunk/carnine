@@ -2,8 +2,11 @@
 
 #include <thread>
 #include <vector>
-
+#include <string>
 #include <sys/poll.h>
+
+#include "../../../modules/SDL2GuiHelper/common/json/json.hpp"
+using json = nlohmann::json;
 
 class SocketController
 {
@@ -26,5 +29,8 @@ public:
     ~SocketController();
 
     int Start();
+
+    void SendAll(const std::string& message);
+    void SendAll(json message);
 };
 

@@ -1,0 +1,11 @@
+[Unit]
+Description=CarNiNe Service
+After=network.target carnine.socket
+Requires=carnine.socket
+
+[Service]
+ExecStart=/home/punky/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
+WorkingDirectory=/home/punky/develop/carnine/bin/Linux
+
+[Install]
+WantedBy=default.target

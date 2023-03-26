@@ -163,12 +163,14 @@ void SocketController::HandleReceived(int socket)
         const auto rc = write(_backendPipe, &message, sizeof(message));
         if(rc != sizeof(message)) {
             LOG(ERROR) << "Writing intern Pipe " << strerror(errno);
+        } else {
+            SendAll(std::string("selbstmord\n"));
         }
     } else {
         try {
             const auto jsonText = json::parse(buffer);
             auto message = new WorkerMessage();
-            message->_messageType = worker_message_type::json;
+            message->_messageType = worker_message_type::controller;
             message->_messageJson = jsonText;
             const auto rc = write(_backendPipe, &message, sizeof(message));
             if(rc != sizeof(message)) {
@@ -229,4 +231,19 @@ int SocketController::Start()
     _loopThread = std::thread(&SocketController::Loop, this);
 
     return result;
+}
+
+void SocketController::SendAll(const std::string& message)
+{
+    for(std::size_t i = 1; i< _watchSockets.size(); i++ ) {
+        const auto count = write(_watchSockets[i], (void*)message.c_str(), message.size());
+        if(count == -1) {
+            LOG(ERROR) << "Writing socket Pipe " << strerror(errno);
+        }
+    }
+}
+
+void SocketController::SendAll(json message)
+{
+    SendAll(message.dump());
 }

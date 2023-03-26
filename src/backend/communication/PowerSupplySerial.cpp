@@ -36,6 +36,8 @@
 
 void PowerSupplySerial::PowerOffSystemdBus(int sec)
 {
+    //TODO This not Good hier Put on Other Class
+
     if(_shutdownInWork) {
         LOG(DEBUG) << "Shudown ist already started";
         return;

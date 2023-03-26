@@ -111,10 +111,16 @@ static int pipe_receive(sd_event_source *es, int fd, uint32_t revents, void *use
         if(message->_messageType == worker_message_type::die) {
             auto const result = sd_event_exit(event, 0);
             std::cout << "sd_event_exit " << result << std::endl;
-        } else {
+        } else if(message->_messageType == worker_message_type::controller) {
             if(backendController != nullptr) {
                 backendController->HandleWorkerMessage(message);
             }
+        } else if(message->_messageType == worker_message_type::all) {
+            if(socketController != nullptr) {
+                socketController->SendAll(message->_messageJson);
+            }
+        } else {
+            LOG(WARNING) << "Message Lost";
         }
         delete message;
     }
@@ -306,7 +312,7 @@ int main(int argc, char** argv)
     }
 
     socketController = new SocketController(server_socket, pipefd[1]);
-    backendController = new BackendController(config);
+    backendController = new BackendController(config, pipefd[1]);
 
     functionResult = backendController->Init();
     if(functionResult != 0) {

@@ -7,10 +7,11 @@ class BackendController
 {
     std::shared_ptr<PowerSupplySerial> _powerSerial;
     BackendConfig* _config;
+    int _backendPipe;
     void PowerOffEvent();
 
   public:
-    BackendController(BackendConfig* config);
+    BackendController(BackendConfig* config, int backendPipe);
     ~BackendController();
 
     int Init();

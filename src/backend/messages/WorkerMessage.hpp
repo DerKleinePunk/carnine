@@ -6,8 +6,8 @@ using json = nlohmann::json;
 
 enum class worker_message_type : int {
 	die,
-	json,
-
+	controller,
+    all
 };
 
 std::ostream& operator<<(std::ostream& os, const worker_message_type c);

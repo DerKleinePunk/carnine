@@ -14,7 +14,7 @@ enum class backend_message_type : int16_t {
 	base,
 	welcome,
     powerSupplyWatchdog,
-    
+    powerOff
 };
 
 struct baseMessage {
@@ -50,3 +50,11 @@ struct powerSupplyWatchdog : public baseMessage {
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(powerSupplyWatchdog, version, type, state)
+
+struct powerOff : public baseMessage {
+    powerOff() : baseMessage(backend_message_type::powerOff, BACKENDPROTOCOLVER) {
+
+    }
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(powerOff, version, type)
