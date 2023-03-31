@@ -46,3 +46,11 @@ nc -U /tmp/CarNiNe.sock
 
 valgrind --tool=memcheck ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
 valgrind --tool=memcheck --leak-check=full ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
+
+## UDEV
+
+https://github.com/Jinjinov/Usb.Events/blob/master/Usb.Events/UsbEventWatcher.Linux.c
+
+https://github.com/nwoki/udevnotifier
+
+https://github.com/wkennington/systemd/blob/dd34ef678f6e8124c50db3d855e098ac6e55d75d/src/login/logind.c

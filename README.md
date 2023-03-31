@@ -30,6 +30,7 @@ Without this million html pages and line of codes this software doesn't work.
 + [Libosmscout](http://libosmscout.sourceforge.net/)
 + [cairo](https://cairographics.org/)
 + [FFmpeg](http://ffmpeg.org/)
++ [Systemd](https://systemd.io/)
 
 look at [DebianPackages](DebianPackages.txt)
 
