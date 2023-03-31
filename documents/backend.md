@@ -15,3 +15,15 @@ message Type [see](../src/common/messages/BackendMessages.hpp) backend_message_t
 ## Config als Systemd Service
 
 [see](../tools/systemd/infos.md)
+
+## Config (Json File)
+
+### UdpLogServer
+
+set Ip oder Upd Broadcast IP it sends the Logs via UDP throw the Network on Port 9090.
+
+nc -k -l 9090 -> Run Server to see the Logs
+
+### PowerSupplyPort
+
+The Serial Port for the Powersubly [see](../src/powersupply/)

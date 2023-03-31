@@ -18,7 +18,7 @@ endif()
 add_executable(${project_BIN} ${SRCS} ${MAIN_common_SRCS} ${easylogging_SRCS} ${common_utils_SRCS} ${common_utils_SRCS_LOGGER} ${common_utils_communication_SRCS})
 
 TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
-TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_NET_LIBRARIES} systemd )
+TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_NET_LIBRARIES} systemd udev)
 
 set(MAINFONTSOURCE "${MAINFOLDER}/src/backend/loggerBackend.conf")
 add_custom_command(TARGET ${project_BIN} POST_BUILD # Adds a post-build event to MyTest
