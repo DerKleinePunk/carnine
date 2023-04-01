@@ -464,6 +464,9 @@ int main(int argc, char** argv)
     backendController->Stop();
 
 finish:
+    udev_device_event_source = sd_event_source_unref(udev_device_event_source);
+    timer_source = sd_event_source_unref(timer_source);
+    event_source = sd_event_source_unref(event_source);
 
     udev_monitor_unref(udevDeviceMonitor);
     udev_unref(udevContext);

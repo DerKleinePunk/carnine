@@ -46,6 +46,7 @@ nc -U /tmp/CarNiNe.sock
 
 valgrind --tool=memcheck ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
 valgrind --tool=memcheck --leak-check=full ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
+valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all ~/develop/carnine/bin/Linux/CarNiNeBackend.bin --c=BackendConfig.json
 
 ## UDEV
 
