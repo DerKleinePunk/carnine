@@ -17,6 +17,7 @@
 #include "../../../modules/SDL2GuiHelper/common/utils/commonutils.h"
 #include "../messages/WorkerMessage.hpp"
 #include "../../common/messages/BackendMessages.hpp"
+#include "MountPoint.hpp"
 
 #define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
 
@@ -143,31 +144,38 @@ int UdevController::HandleDeviceMessage()
         
     } else if(action == "change" && devType == "partition") {
         
+        auto label = std::string("");
         auto labelChars = udev_device_get_property_value(device, "ID_FS_LABEL_ENC");
         if(labelChars != nullptr) {
 
             auto buffer = new char[strlen(labelChars) + 1];
             auto size = unhexmangle_to_buffer(labelChars, buffer, strlen(labelChars) + 1);
-            const auto label = std::string(buffer, size);
+            label = std::string(buffer, size);
             
-            const auto devPath = utils::chartoStringNullSave(udev_device_get_devpath(device));
-            const auto devNode = utils::chartoStringNullSave(udev_device_get_devnode(device));
-            const auto sysName = utils::chartoStringNullSave(udev_device_get_sysname(device));
-
-            LOG(INFO) << "label" << label << "\ndevPath " << devPath << "\nsysName " << sysName;
-
             delete [] buffer;
-
-            auto message = new WorkerMessage();
-            message->_messageType = worker_message_type::controller;
-            newStorageDetected messageJson;
-            messageJson.mountPath = "";
-            message->_messageJson = messageJson;
-            const auto rc = write(_backendPipe, &message, sizeof(message));
-            if(rc != sizeof(message)) {
-                LOG(ERROR) << "Writing intern Pipe " << strerror(errno);
-            }
         }
+
+        const auto devPath = utils::chartoStringNullSave(udev_device_get_devpath(device));
+        const auto devNode = utils::chartoStringNullSave(udev_device_get_devnode(device));
+        auto sysName = utils::chartoStringNullSave(udev_device_get_sysname(device));
+
+        LOG(INFO) << "label" << label << "\ndevPath " << devPath << "\nsysName " << sysName;
+
+        sysName = "/dev/" + sysName;
+        auto mountPoint = new MountPoint(sysName);
+
+        auto message = new WorkerMessage();
+        message->_messageType = worker_message_type::controller;
+        newStorageDetected messageJson;
+        messageJson.mountPath = mountPoint->Find();
+
+        message->_messageJson = messageJson;
+        const auto rc = write(_backendPipe, &message, sizeof(message));
+        if(rc != sizeof(message)) {
+            LOG(ERROR) << "Writing intern Pipe " << strerror(errno);
+        }
+
+        delete mountPoint;
     }
     
     udev_device_unref(device);

@@ -5,6 +5,7 @@
 class MountPoint
 {
 private:
+    std::string GetData();
     std::string _devPath;
 public:
     MountPoint(const std::string& devPath);
