@@ -95,6 +95,10 @@ void BackendController::HandleWorkerMessage(WorkerMessage* message)
                 _powerSerial->ServiceModeOn();
             }
         }
+        if(messageJson.type == backend_message_type::newStorageDetected) {
+            newStorageDetected messageIntern = message->_messageJson;
+            LOG(INFO) << "newStorageDetected " << messageIntern.mountPath;
+        }
     }
 
     LOG(DEBUG) << "HandleWorkerMessage <-";

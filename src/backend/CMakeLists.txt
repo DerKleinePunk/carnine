@@ -1,7 +1,10 @@
 project("CarNiNeBackend" VERSION "${RELEASE_VERSION}" LANGUAGES CXX)
 
+pkg_check_modules(LibMount REQUIRED IMPORTED_TARGET "mount")
+
 INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${SDL2_NET_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${LibMount_INCLUDE_DIRS})
 
 MESSAGE(STATUS "Try Build ${PROJECT_NAME} in Version ${RELEASE_VERSION}")
 
@@ -18,7 +21,7 @@ endif()
 add_executable(${project_BIN} ${SRCS} ${MAIN_common_SRCS} ${easylogging_SRCS} ${common_utils_SRCS} ${common_utils_SRCS_LOGGER} ${common_utils_communication_SRCS})
 
 TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
-TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_NET_LIBRARIES} systemd udev)
+TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_NET_LIBRARIES} systemd udev mount)
 
 set(MAINFONTSOURCE "${MAINFOLDER}/src/backend/loggerBackend.conf")
 add_custom_command(TARGET ${project_BIN} POST_BUILD # Adds a post-build event to MyTest

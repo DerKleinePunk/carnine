@@ -14,13 +14,15 @@ enum class backend_message_type : int16_t {
 	base,
 	welcome,
     powerSupplyWatchdog,
-    powerOff
+    powerOff,
+    newCamDetected,
+    newStorageDetected,
 };
 
 struct baseMessage {
-    baseMessage(backend_message_type type, const std::string& ver)
+    baseMessage(backend_message_type messageType, const std::string& ver)
     {
-        type = type;
+        type = messageType;
         version = ver;
     }
     baseMessage()
@@ -29,32 +31,55 @@ struct baseMessage {
     }
     std::string version;
     backend_message_type type;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(baseMessage, version, type)
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(baseMessage, version, type)
+
 
 struct welcomeMessage : public baseMessage {
     welcomeMessage() : baseMessage(backend_message_type::welcome, BACKENDPROTOCOLVER) {
 
     }
     std::string systemName;
-};
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(welcomeMessage, version, type, systemName)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(welcomeMessage, version, type, systemName)
+};
 
 struct powerSupplyWatchdog : public baseMessage {
     powerSupplyWatchdog() : baseMessage(backend_message_type::powerSupplyWatchdog, BACKENDPROTOCOLVER) {
 
     }
     bool state;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(powerSupplyWatchdog, version, type, state)
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(powerSupplyWatchdog, version, type, state)
+
 
 struct powerOff : public baseMessage {
     powerOff() : baseMessage(backend_message_type::powerOff, BACKENDPROTOCOLVER) {
 
     }
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(powerOff, version, type)
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(powerOff, version, type)
+struct newCamDetected : public baseMessage {
+    newCamDetected() : baseMessage(backend_message_type::newCamDetected, BACKENDPROTOCOLVER) {
+        devPath = "";
+    }
+
+    std::string devPath;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(newCamDetected, version, type, devPath)
+};
+
+
+
+struct newStorageDetected : public baseMessage {
+    newStorageDetected() : baseMessage(backend_message_type::newStorageDetected, BACKENDPROTOCOLVER) {
+        mountPath = "";
+    }
+
+    std::string mountPath;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(newStorageDetected, version, type, mountPath)
+};

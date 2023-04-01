@@ -26,6 +26,7 @@
 #include "Config/BackendConfig.hpp"
 #include "Controller/BackendController.hpp"
 #include "Controller/SocketController.hpp"
+#include "Controller/UdevController.hpp"
 #include "messages/WorkerMessage.hpp"
 
 char socketPath[] = "/tmp/CarNiNe.sock";
@@ -60,9 +61,6 @@ void PreRollOutCallback(const char* fullPath, std::size_t s)
 }
 
 static sd_event* event = nullptr;
-static udev* udevContext = nullptr;
-static udev_monitor* udevDeviceMonitor = nullptr;
-static sd_event_source* udev_device_event_source = nullptr;
 
 void handleUserInterrupt(int sig)
 {
@@ -80,6 +78,7 @@ void handleUserInterrupt(int sig)
 BackendConfig* config = nullptr;
 BackendController* backendController = nullptr;
 SocketController* socketController = nullptr;
+UdevController* udevController = nullptr;
 
 // Time Callback called every ?
 static const uint64_t stats_every_usec = 10 * 1000000;
@@ -128,89 +127,6 @@ static int pipe_receive(sd_event_source *es, int fd, uint32_t revents, void *use
         }
         delete message;
     }
-
-    return 0;
-}
-
-static std::string toString(const char* value) {
-    return std::string(value ? value : "");
-}
-
-static int dispatch_device_udev(sd_event_source *es, int fd, uint32_t revents, void *userdata) {
-    ++received_counter;
-    const auto device = udev_monitor_receive_device(udevDeviceMonitor);
-    if (!device) {
-        return -ENOMEM;
-    }
-
-    const auto action = toString(udev_device_get_action(device));
-    const auto devType = toString(udev_device_get_devtype(device));
-    const auto subSystem = toString(udev_device_get_subsystem(device));
-
-    LOG(INFO) << subSystem << " device " << action << " DevType " << devType;
-
-    if (action == "remove") {
-        
-    } else if(action == "add" ) {
-        const auto devPath = toString(udev_device_get_devpath(device));
-        const auto sysPath = toString(udev_device_get_syspath(device));
-        const auto sysName = toString(udev_device_get_sysname(device));
-
-        LOG(INFO) << "add devPath" << devPath << " sysPath " << sysPath << " sysName " << sysName;
-    } else if(action == "bind" ) {
-        const auto devPath = toString(udev_device_get_devpath(device));
-        const auto sysPath = toString(udev_device_get_syspath(device));
-        const auto sysName = toString(udev_device_get_sysname(device));
-
-        LOG(INFO) << "bind devPath " << devPath << " sysPath " << sysPath << " sysName " << sysName;
-        
-    } else if(action == "change" && devType == "partition") {
-        
-        const auto label = toString(udev_device_get_property_value(device, "ID_FS_LABEL_ENC"));
-        LOG(INFO) << "label" << label;
-    }
-    
-    udev_device_unref(device);
-    return 0;
-}
-
-static int ConnectUdev() {
-    int result;
-    udevContext = udev_new();
-    udevDeviceMonitor = udev_monitor_new_from_netlink(udevContext, "udev");
-    if (!udevDeviceMonitor) {
-        return -ENOMEM;
-    }
-
-    //result = udev_monitor_filter_add_match_subsystem_devtype(udevDeviceMonitor, "usb", NULL);
-    result = udev_monitor_filter_add_match_subsystem_devtype(udevDeviceMonitor, "usb", "usb_device");
-    if (result < 0) {
-        return result;
-    }
-
-    //Cam Connected
-    result = udev_monitor_filter_add_match_subsystem_devtype(udevDeviceMonitor, "video4linux", NULL);
-    if (result < 0) {
-        return result;
-    }
-
-    //Usb Stick Mounted
-    result = udev_monitor_filter_add_match_subsystem_devtype(udevDeviceMonitor, "block", NULL);
-    if (result < 0) {
-        return result;
-    }
-
-    result = udev_monitor_enable_receiving(udevDeviceMonitor);
-    if (result < 0) {
-        return result;
-    }
-
-    result = sd_event_add_io(event, &udev_device_event_source, udev_monitor_get_fd(udevDeviceMonitor), EPOLLIN, dispatch_device_udev, nullptr);
-    if (result < 0) {
-        return result;
-    }
-
-    sd_event_source_set_description(udev_device_event_source, "CarNiNe Message Udev");
 
     return 0;
 }
@@ -400,8 +316,9 @@ int main(int argc, char** argv)
 
     socketController = new SocketController(server_socket, pipefd[1]);
     backendController = new BackendController(config, pipefd[1]);
+    udevController = new UdevController(pipefd[1]);
 
-    if(ConnectUdev() < 0) {
+    if(udevController->Init() < 0) {
         sd_journal_print(LOG_ERR, "ConnectUdev Failed %d", functionResult);
         exit_code = 207;
         goto finish;
@@ -464,12 +381,13 @@ int main(int argc, char** argv)
     backendController->Stop();
 
 finish:
-    udev_device_event_source = sd_event_source_unref(udev_device_event_source);
+    
     timer_source = sd_event_source_unref(timer_source);
     event_source = sd_event_source_unref(event_source);
 
-    udev_monitor_unref(udevDeviceMonitor);
-    udev_unref(udevContext);
+    if(udevController != nullptr) {
+        delete udevController;
+    }
 
     if(backendController != nullptr) {
         delete backendController;
