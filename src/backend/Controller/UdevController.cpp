@@ -125,22 +125,36 @@ int UdevController::HandleDeviceMessage()
     const auto devType = utils::chartoStringNullSave(udev_device_get_devtype(device));
     const auto subSystem = utils::chartoStringNullSave(udev_device_get_subsystem(device));
 
-    LOG(INFO) << subSystem << " device " << action << " DevType " << devType;
+    LOG(INFO) << "subSystem " << subSystem << " action " << action << " DevType " << devType;
 
     if (action == "remove") {
-        
+                
     } else if(action == "add" ) {
         const auto devPath = utils::chartoStringNullSave(udev_device_get_devpath(device));
         const auto sysPath = utils::chartoStringNullSave(udev_device_get_syspath(device));
         const auto sysName = utils::chartoStringNullSave(udev_device_get_sysname(device));
 
-        LOG(INFO) << "add devPath" << devPath << " sysPath " << sysPath << " sysName " << sysName;
+        LOG(DEBUG) << "devPath " << devPath << " sysPath " << sysPath << " sysName " << sysName;
+
+        if(subSystem == "video4linux" && !sysName.empty()) {
+            auto message = new WorkerMessage();
+            message->_messageType = worker_message_type::controller;
+            newCamDetected messageJson;
+            messageJson.devPath = "/dev/" + sysName;
+
+            message->_messageJson = messageJson;
+            const auto rc = write(_backendPipe, &message, sizeof(message));
+            if(rc != sizeof(message)) {
+                LOG(ERROR) << "Writing intern Pipe " << strerror(errno);
+            }
+
+        }
     } else if(action == "bind" ) {
         const auto devPath = utils::chartoStringNullSave(udev_device_get_devpath(device));
         const auto sysPath = utils::chartoStringNullSave(udev_device_get_syspath(device));
         const auto sysName = utils::chartoStringNullSave(udev_device_get_sysname(device));
 
-        LOG(INFO) << "bind devPath " << devPath << " sysPath " << sysPath << " sysName " << sysName;
+        LOG(DEBUG) << "bind devPath " << devPath << " sysPath " << sysPath << " sysName " << sysName;
         
     } else if(action == "change" && devType == "partition") {
         

@@ -80,7 +80,7 @@ void BackendController::Stop()
 
 void BackendController::CheckSystem()
 {
-    LOG(INFO) << "CheckSystem ->";
+    LOG(DEBUG) << "CheckSystem ->";
     LOG(DEBUG) << "CheckSystem <-";
 }
 
@@ -95,9 +95,13 @@ void BackendController::HandleWorkerMessage(WorkerMessage* message)
                 _powerSerial->ServiceModeOn();
             }
         }
-        if(messageJson.type == backend_message_type::newStorageDetected) {
+        else if(messageJson.type == backend_message_type::newStorageDetected) {
             newStorageDetected messageIntern = message->_messageJson;
             LOG(INFO) << "newStorageDetected " << messageIntern.mountPath;
+        }
+        else if(messageJson.type == backend_message_type::newCamDetected) {
+            newCamDetected messageIntern = message->_messageJson;
+            LOG(INFO) << "newCamDetected " << messageIntern.devPath;
         }
     }
 

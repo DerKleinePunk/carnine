@@ -55,3 +55,7 @@ https://github.com/Jinjinov/Usb.Events/blob/master/Usb.Events/UsbEventWatcher.Li
 https://github.com/nwoki/udevnotifier
 
 https://github.com/wkennington/systemd/blob/dd34ef678f6e8124c50db3d855e098ac6e55d75d/src/login/logind.c
+
+## Suspend to Disk
+
+https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate
