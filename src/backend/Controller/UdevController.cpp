@@ -138,7 +138,8 @@ int UdevController::HandleDeviceMessage()
 
         if(subSystem == "video4linux" && !sysName.empty()) {
             auto message = new WorkerMessage();
-            message->_messageType = worker_message_type::controller;
+            message->_messageType = worker_message_type::all;
+            message->_sender = worker_sender_type::Udev;
             newCamDetected messageJson;
             messageJson.devPath = "/dev/" + sysName;
 
@@ -180,6 +181,7 @@ int UdevController::HandleDeviceMessage()
 
         auto message = new WorkerMessage();
         message->_messageType = worker_message_type::controller;
+        message->_sender = worker_sender_type::Udev;
         newStorageDetected messageJson;
         messageJson.mountPath = mountPoint->Find();
 

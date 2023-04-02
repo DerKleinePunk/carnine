@@ -18,6 +18,7 @@ void BackendController::PowerOffEvent()
 
     auto message = new WorkerMessage();
     message->_messageType = worker_message_type::all;
+    message->_sender = worker_sender_type::Backenend;
     powerOff  messageJson;
     message->_messageJson = messageJson;
     const auto rc = write(_backendPipe, &message, sizeof(message));

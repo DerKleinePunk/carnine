@@ -10,6 +10,12 @@ enum class worker_message_type : int {
     all
 };
 
+enum class worker_sender_type : int {
+	Backenend,
+	Udev,
+    Socket
+};
+
 std::ostream& operator<<(std::ostream& os, const worker_message_type c);
 
 class WorkerMessage
@@ -18,5 +24,6 @@ public:
     WorkerMessage();
     ~WorkerMessage();
     worker_message_type _messageType;
+    worker_sender_type _sender;
     json _messageJson;
 };

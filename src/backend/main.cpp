@@ -119,6 +119,11 @@ static int pipe_receive(sd_event_source *es, int fd, uint32_t revents, void *use
                 backendController->HandleWorkerMessage(message);
             }
         } else if(message->_messageType == worker_message_type::all) {
+            if(message->_sender != worker_sender_type::Backenend) {
+                if(backendController != nullptr) {
+                    backendController->HandleWorkerMessage(message);
+                }
+            }
             if(socketController != nullptr) {
                 socketController->SendAll(message->_messageJson);
             }
