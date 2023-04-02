@@ -15,10 +15,11 @@ include(CheckCXXCompilerFlag)
 include(ExternalProject)
 include(CheckTypeSize)
 include(CheckIncludeFiles)
-include(GNUInstallDirs)
 
 ## Use the variable PROJECT_NAME for changing the target name
 SET ( PROJECT_NAME "CarNiNe" )
+include(GNUInstallDirs)
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME carnine) # needs to be before any install() commands
 
 ## Version depens on
 SET (SDL2_VER "2.0.12")
