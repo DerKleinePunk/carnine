@@ -118,3 +118,51 @@ InstallSDLComponent SDL_image SDL2_image-2.0.5
 InstallSDLComponent SDL_mixer SDL2_mixer-2.0.4
 InstallSDLComponent SDL_net SDL2_net-2.0.1
 InstallSDLComponent SDL_ttf SDL2_ttf-2.0.18
+
+echo building CarNiNe
+echo "we are here"
+pwd
+
+DIRECTORY="carnine"
+if [ ! -d "$DIRECTORY" ]; then
+	git clone https://github.com/DerKleinePunk/carnine.git
+	exitCode=$?
+	if [ $exitCode -ne 0 ] ; then
+	   echo "git give an Error"
+	   exit $exitCode
+	fi
+	cd $DIRECTORY
+else
+	cd $DIRECTORY
+	if [ "$reproBuild" = "false" ] ; then
+		git pull
+		exitCode=$?
+		if [ $exitCode -ne 0 ] ; then
+			echo "git give an Error"
+			exit $exitCode
+		fi
+	fi
+fi
+
+DIRECTORY="buildrelease"
+if [ ! -d "$DIRECTORY" ]; then
+	mkdir $DIRECTORY
+fi
+cd $DIRECTORY
+
+cmake .. -DCMAKE_BUILD_TYPE=Release -DTARGET=Linux -DENABLE_CPPCHECK=OFF
+exitCode=$?
+if [ $exitCode -ne 0 ] ; then
+	echo "cmake give an Error"
+	exit $exitCode
+fi
+
+cmake --build . -j $(nproc)
+exitCode=$?
+if [ $exitCode -ne 0 ] ; then
+	echo "cmake give an Error"
+	exit $exitCode
+fi
+cd ..
+
+echo Build Ok Now wie need Start/Update Service and UI
