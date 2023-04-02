@@ -39,6 +39,15 @@ InstallPackage(){
 	fi
 }
 
+InstallPackage git
+InstallPackage git-lfs
+
+DEPENSFILE="DebianPackages.txt"
+
+while read LINE; do
+     InstallPackage $LINE
+done < $DEPENSFILE
+
 InstallSDLComponent(){
 	packageName="$1"
 	packageVersion="$2"
@@ -119,6 +128,72 @@ InstallSDLComponent SDL_mixer SDL2_mixer-2.0.4
 InstallSDLComponent SDL_net SDL2_net-2.0.1
 InstallSDLComponent SDL_ttf SDL2_ttf-2.0.18
 
+DIRECTORY="libosmscout"
+if [ ! -d "$DIRECTORY" ]; then
+	git clone https://github.com/Framstag/libosmscout.git
+	exitCode=$?
+	if [ $exitCode -ne 0 ] ; then
+	   echo "git give an Error"
+	   exit $exitCode
+	fi
+	cd libosmscout
+	git checkout 8cd316736da94541f272bd3ab8e9f0eb4750e73c
+	exitCode=$?
+	if [ $exitCode -ne 0 ] ; then
+	   echo "git give an Error"
+	   exit $exitCode
+	fi
+else
+	cd libosmscout
+	git reset --hard
+	git pull
+	rm OSMScout2/translations/cs.ts
+	rm OSMScout2/translations/en.ts
+	git checkout 8cd316736da94541f272bd3ab8e9f0eb4750e73c
+	exitCode=$?
+	if [ $exitCode -ne 0 ] ; then
+	   echo "git give an Error"
+	   exit $exitCode
+	fi
+fi
+
+echo buildding libosmscout debug
+DIRECTORY="build"
+if [ ! -d "$DIRECTORY" ]; then
+	mkdir $DIRECTORY
+fi
+cd $DIRECTORY
+rm CMakeCache.txt
+if [ "$rpiversion" == "raspberrypi,4" ] ; then
+	cmake .. -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_ENABLE_SSE=ON -DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_DEMOS=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF -DOSMSCOUT_BUILD_IMPORT=OFF -DOSMSCOUT_BUILD_CLIENT_QT=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF -DOSMSCOUT_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-Wno-psabi" -Wno-dev
+elif [ "$rpiversion" == "raspberrypi,3" ] ; then
+    cmake .. -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_ENABLE_SSE=ON -DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_DEMOS=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF -DOSMSCOUT_BUILD_IMPORT=OFF -DOSMSCOUT_BUILD_CLIENT_QT=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF -DOSMSCOUT_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-Wno-psabi" -Wno-dev
+else
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+fi
+cmake --build . -j $(nproc)
+sudo cmake --build . --target install
+cd ..
+
+echo buildding libosmscout release
+DIRECTORY="buildrelease"
+if [ ! -d "$DIRECTORY" ]; then
+	mkdir $DIRECTORY
+fi
+cd $DIRECTORY
+rm CMakeCache.txt
+if [ "$rpiversion" == "raspberrypi,4" ] ; then
+	cmake .. -DCMAKE_BUILD_TYPE=Release -DOSMSCOUT_ENABLE_SSE=ON -DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_DEMOS=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF -DOSMSCOUT_BUILD_IMPORT=OFF -DOSMSCOUT_BUILD_CLIENT_QT=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF -DOSMSCOUT_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-Wno-psabi" -Wno-dev
+elif [ "$rpiversion" == "raspberrypi,3" ] ; then
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DOSMSCOUT_ENABLE_SSE=ON -DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_DEMOS=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF -DOSMSCOUT_BUILD_IMPORT=OFF -DOSMSCOUT_BUILD_CLIENT_QT=OFF -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF -DOSMSCOUT_BUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-Wno-psabi" -Wno-dev
+else
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+fi
+cmake --build . -j $(nproc)
+sudo cmake --build . --target install
+cd ..
+cd ..
+
 echo building CarNiNe
 echo "we are here"
 pwd
@@ -132,6 +207,12 @@ if [ ! -d "$DIRECTORY" ]; then
 	   exit $exitCode
 	fi
 	cd $DIRECTORY
+	git submodule init
+	exitCode=$?
+	if [ $exitCode -ne 0 ] ; then
+	   echo "git give an Error"
+	   exit $exitCode
+	fi
 else
 	cd $DIRECTORY
 	if [ "$reproBuild" = "false" ] ; then
@@ -141,6 +222,20 @@ else
 			echo "git give an Error"
 			exit $exitCode
 		fi
+	fi
+	if [ ! -f modules/SDL2GuiHelper/LICENSE ]; then
+		git submodule init
+		exitCode=$?
+		if [ $exitCode -ne 0 ] ; then
+	   		echo "git give an Error"
+	   		exit $exitCode
+		fi
+	fi
+	git submodule update
+	exitCode=$?
+	if [ $exitCode -ne 0 ] ; then
+		echo "git give an Error"
+		exit $exitCode
 	fi
 fi
 
