@@ -19,3 +19,4 @@ libjpeg-dev
 libuvc0
 libgles2-mesa-dev
 libmount-dev
+libpango1.0-dev

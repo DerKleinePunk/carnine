@@ -48,6 +48,14 @@ while read LINE; do
      InstallPackage $LINE
 done < $DEPENSFILE
 
+sudo apt-get --yes update
+sudo apt-get --yes upgrade
+sudo apt-get autoremove -y
+
+rpiversion=$(cat /sys/firmware/devicetree/base/compatible |cut -c1-13)
+echo "PI $rpiversion"
+DEBUG "PI $rpiversion"
+
 InstallSDLComponent(){
 	packageName="$1"
 	packageVersion="$2"

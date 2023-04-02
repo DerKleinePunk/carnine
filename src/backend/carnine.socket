@@ -1,0 +1,9 @@
+[Unit]
+Description=CarNiNe Service Socket
+PartOf=carnine.service
+
+[Socket]
+ListenStream=/tmp/CarNiNe.sock
+
+[Install]
+WantedBy=sockets.target

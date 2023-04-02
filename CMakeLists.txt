@@ -15,6 +15,7 @@ include(CheckCXXCompilerFlag)
 include(ExternalProject)
 include(CheckTypeSize)
 include(CheckIncludeFiles)
+include(GNUInstallDirs)
 
 ## Use the variable PROJECT_NAME for changing the target name
 SET ( PROJECT_NAME "CarNiNe" )
@@ -103,6 +104,7 @@ if(SDL2_FOUND)
 endif()
 
 MESSAGE(STATUS "SDL2 ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS}")
+include(${CMAKE_SOURCE_DIR}/cmake/systemdService.cmake)
 
 ADD_SUBDIRECTORY(modules/SDL2GuiHelper/common)
 ADD_SUBDIRECTORY(modules/SDL2GuiHelper/src)

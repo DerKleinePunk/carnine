@@ -1,0 +1,11 @@
+[Unit]
+Description=CarNiNe Service
+After=network.target carnine.socket
+Requires=carnine.socket
+
+[Service]
+ExecStart=@CMAKE_INSTALL_FULL_LIBDIR@/CarNiNeBackend.bin --c=BackendConfig.json
+WorkingDirectory=@CMAKE_INSTALL_FULL_LIBDIR@
+
+[Install]
+WantedBy=default.target
