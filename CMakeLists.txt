@@ -18,8 +18,6 @@ include(CheckIncludeFiles)
 
 ## Use the variable PROJECT_NAME for changing the target name
 SET ( PROJECT_NAME "CarNiNe" )
-include(GNUInstallDirs)
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME carnine) # needs to be before any install() commands
 
 ## Version depens on
 SET (SDL2_VER "2.0.12")
@@ -30,6 +28,9 @@ file(STRINGS "RELEASE_VERSION.txt" RELEASE_VERSION)
 SET(RELEASE_VERSION  "${RELEASE_VERSION}" CACHE INTERNAL "RELEASE_VERSION")
 
 PROJECT(${PROJECT_NAME} VERSION "${RELEASE_VERSION}" ) ## Not Able to use CXX because C files are not compiled
+
+include(GNUInstallDirs)
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME carnine) # needs to be before any install() commands
 
 MESSAGE(STATUS "Try Build ${PROJECT_NAME}")
 message(STATUS "Compiler ${CMAKE_CXX_COMPILER_ID}")

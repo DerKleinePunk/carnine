@@ -82,6 +82,7 @@ macro(find_component _component _library _header _version _version_required)
        set(VERSION_NEED ${_version_required})
        message(STATUS "${_component} too old found ${VERSION_IS} need ${VERSION_NEED}")
     else()
+       set(CMAKE_FIND_PACKAGE_NAME ${_component})
        find_package_handle_standard_args(${_component}
                                         REQUIRED_VARS ${_component}_LIBRARIES ${_component}_INCLUDE_DIRS
                                         VERSION_VAR ${_component}_VERSION_STRING)

@@ -94,6 +94,7 @@ foreach (_component ${FFmpeg_FIND_COMPONENTS})
   list(APPEND _FFmpeg_REQUIRED_VARS ${_component}_LIBRARIES ${_component}_INCLUDE_DIRS)
 endforeach ()
 
+set(CMAKE_FIND_PACKAGE_NAME FFmpeg)
 # Give a nice error message if some of the required vars are missing.
 find_package_handle_standard_args(FFmpeg 
                                     REQUIRED_VARS ${_FFmpeg_REQUIRED_VARS}
