@@ -27,3 +27,8 @@ nc -k -l 9090 -> Run Server to see the Logs
 ### PowerSupplyPort
 
 The Serial Port for the Powersubly [see](../src/powersupply/)
+
+## SystemD
+
+[journal-gatewayd](https://github.com/systemd/systemd/blob/main/src/journal-remote/journal-gatewayd.c)
+Die Idee dahinter Errors suchen und ggf Falls Melden.
