@@ -16,8 +16,9 @@ librsvg2-dev
 libsystemd-dev
 libv4l-dev
 libjpeg-dev
-libuvc0
 libgles2-mesa-dev
 libmount-dev
 libpango1.0-dev
 libsqlite3-dev
+libgoogle-perftools-dev
+

@@ -57,29 +57,32 @@ echo "PI $rpiversion"
 DEBUG "PI $rpiversion"
 
 InstallSDLComponent(){
+	# https://github.com/libsdl-org/SDL/releases/download/release-2.28.1/SDL2-2.28.1.tar.gz
 	packageName="$1"
 	packageVersion="$2"
-	if [ ! -d "$packageVersion" ]; then
-		wget -N https://www.libsdl.org/projects/$packageName/release/$packageVersion.tar.gz
+	packageDirName="$3-${packageVersion}"
+	packageFileName="${packageDirName}.tar.gz"
+	if [ ! -d "$packageDirName" ]; then
+		wget -N https://github.com/libsdl-org/$packageName/releases/download/release-$packageVersion/$packageFileName
 		exitCode=$?
 		if [ $exitCode -ne 0 ] ; then
 		   echo "wget give an Error"
 		   exit $exitCode
 		fi
-		tar -xzf $packageVersion.tar.gz
+		tar -xzf $packageFileName
 		exitCode=$?
 		if [ $exitCode -ne 0 ] ; then
 		   echo "tar give an Error"
 		   exit $exitCode
 		fi
-		cd $packageVersion
+		cd $packageDirName
 		./autogen.sh
 		./configure
 		make -j$(nproc)
 		sudo make install
 		cd ..
 	else
-		cd $packageVersion
+		cd $packageDirName
 		./autogen.sh
 		./configure
 		make -j$(nproc)
@@ -95,9 +98,9 @@ fi
 echo "we are here"
 pwd
 
-DIRECTORY="SDL2-2.26.4"
+DIRECTORY="SDL2-2.28.1"
 if [ ! -d "$DIRECTORY" ]; then
-	wget -N https://www.libsdl.org/release/$DIRECTORY.tar.gz
+	wget -N https://github.com/libsdl-org/SDL/releases/download/release-2.28.1/$DIRECTORY.tar.gz
 	exitCode=$?
 	if [ $exitCode -ne 0 ] ; then
 	   echo "wget give an Error"
@@ -131,10 +134,10 @@ make -j$(nproc)
 sudo make install
 cd ..
 
-InstallSDLComponent SDL_image SDL2_image-2.0.5
-InstallSDLComponent SDL_mixer SDL2_mixer-2.0.4
-InstallSDLComponent SDL_net SDL2_net-2.0.1
-InstallSDLComponent SDL_ttf SDL2_ttf-2.0.18
+InstallSDLComponent SDL_image 2.6.3 SDL2_image
+InstallSDLComponent SDL_mixer 2.6.3 SDL2_mixer
+InstallSDLComponent SDL_net 2.2.0 SDL2_net
+InstallSDLComponent SDL_ttf 2.20.2 SDL2_ttf
 
 DIRECTORY="libosmscout"
 if [ ! -d "$DIRECTORY" ]; then
