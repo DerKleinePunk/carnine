@@ -5,7 +5,11 @@
 class CarNiNeApp
 {
 private:
-    MiniKernel* _kernel;
+    MiniKernel* _kernel{};
+    GUIElementManager* _manager{};
+    
+    void ApplicationEvent(AppEvent event, void* data1, void* data2);
+    void KernelstateChanged(KernelState state);
 public:
     CarNiNeApp(MiniKernel* kernel);
     ~CarNiNeApp();

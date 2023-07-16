@@ -26,5 +26,29 @@
             "preLaunchTask": "", //buildDebug,
             "miDebuggerPath": "/usr/bin/gdb"
         },
+        {
+            "name": "(gdb) Frontend",
+            "type": "cppdbg",
+            "request": "launch",
+            "targetArchitecture": "x86_64",
+            "program": "${workspaceFolder}/bin/Linux/CarNiNe.bin",
+            "args": [
+                "--v=9"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/Linux/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": false
+                }
+            ],
+            "preLaunchTask": "", //buildDebug,
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
     ]
 }

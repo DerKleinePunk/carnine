@@ -44,7 +44,19 @@ TARGET_LINK_LIBRARIES(${project_BIN} ${SQLITE3_LIBRARIES})
 TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_MIXER_LIBRARIES})
 TARGET_LINK_LIBRARIES(${project_BIN} ${SDL2_NET_LIBRARIES})
 
+message(STATUS "Generating Copy Rule for Resources")
+
 set(MAINFONTSOURCE "${MAINFOLDER}/src/frontend/logger.conf")
+add_custom_command(TARGET ${project_BIN} POST_BUILD # Adds a post-build event to MyTest
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+                       "${MAINFONTSOURCE}"      # <--this is in-file
+                       $<TARGET_FILE_DIR:${project_BIN}>)
+set(MAINFONTSOURCE "${MAINFOLDER}/resources/font/Inconsolata-Bold.ttf")
+add_custom_command(TARGET ${project_BIN} POST_BUILD # Adds a post-build event to MyTest
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+                       "${MAINFONTSOURCE}"      # <--this is in-file
+                       $<TARGET_FILE_DIR:${project_BIN}>)
+set(MAINFONTSOURCE "${MAINFOLDER}/resources/font/Inconsolata-Regular.ttf")
 add_custom_command(TARGET ${project_BIN} POST_BUILD # Adds a post-build event to MyTest
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
                        "${MAINFONTSOURCE}"      # <--this is in-file
