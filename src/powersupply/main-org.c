@@ -28,7 +28,7 @@ volatile uint8_t Sleep;
 
 uint32_t RunTime;
 
-SIGNAL(SIG_OUTPUT_COMPARE0A) // Global Timer, 1000 Hz
+SIGNAL(TIMER0_COMPA_vect) // Global Timer, 1000 Hz
 {
     GlobalTime++;
     Int1msCount++;
@@ -43,7 +43,7 @@ void sleep(long ms)
         ;
 }
 
-SIGNAL(SIG_ADC)
+SIGNAL(ADC_vect)
 {
     volatile uint16_t Temp;
 
@@ -55,7 +55,7 @@ SIGNAL(SIG_ADC)
     ADCSRA = ADCSRA | 64;
 }
 
-SIGNAL(SIG_USART_DATA) // Received Data from PC
+SIGNAL(USART_UDRE_vect) // Received Data from PC
 {
     if(SerOutBuffIn != SerOutBuffOut) {
         UDR0 = OutputBuffer[SerOutBuffOut];
@@ -67,7 +67,7 @@ SIGNAL(SIG_USART_DATA) // Received Data from PC
         UCSR0B = UCSR0B & (255 - 32);
 }
 
-SIGNAL(SIG_USART_RECV) // Received Data from PC
+SIGNAL(USART_RX_vect) // Received Data from PC
 {
     InputBuffer[SerInBuffIn] = UDR0;
     if(SerInBuffIn >= SerBufMax - 1) {
@@ -144,7 +144,7 @@ void InitSerial()
     UCSR0B = 128 + 16 + 8;
     UCSR0C = 128 | 6;
     UBRR0H = 0;
-    UBRR0L = 25; //  BPS
+    UBRR0L = 25; //38400 BPS
 }
 
 void InitGlobalVariables()

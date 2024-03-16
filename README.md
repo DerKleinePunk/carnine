@@ -39,3 +39,7 @@ also [see](https://www.carnine.de/depends.html)
 ## Documentation (German)
 
 [Index](documents/index.md)
+
+## Compiler for Avr8 (powersupply)
+
+[WinAVR](https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/avr8-gnu-toolchain-3.7.0.1796-win32.any.x86_64.zip)
