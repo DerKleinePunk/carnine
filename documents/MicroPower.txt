@@ -1,0 +1,8 @@
+> Bei dem Netzteil ist KL15 am Eingang ein High, ja. Der Abschaltpegel vom
+> PI (Pi->Netzteil) müßte low (=abschalten) sein, sonst funktioniert es ja
+> nicht. Der Pegel vom Signal 'Kl15 liegt an' ist glaube ich low, da bin
+> ich mir aber gerade nicht sicher.
+
+Eingangsspannung 9-30 Volt
+- Ausgangsspannung 5.15 Volt
+- Maximaler Strom: 4 Ampere
