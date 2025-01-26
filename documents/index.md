@@ -1,5 +1,6 @@
 # Index
 
+* [Gedanken](impureThoughts.md)
 * [PI](pi.md)
 * [Linux](linux.md)
 * [Hardware](hardware.md)
